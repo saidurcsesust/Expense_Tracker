@@ -162,7 +162,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tracker", description="Expense Tracker CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+
     add_parser = subparsers.add_parser("add", help="Add an expense")
+
+    # argument of add expenses command
     add_parser.add_argument("--date", help="YYYY-MM-DD")
     add_parser.add_argument("--category", required=True)
     add_parser.add_argument("--amount", required=True)
@@ -170,13 +173,15 @@ def build_parser() -> argparse.ArgumentParser:
     add_parser.add_argument("--currency", default="BDT")
     add_parser.set_defaults(func=_handle_add)
 
+
+
     list_parser = subparsers.add_parser("list", help="List expenses")
     list_parser.add_argument("--month", help="YYYY-MM")
     list_parser.add_argument("--category")
     list_parser.add_argument("--min", dest="min")
     list_parser.add_argument("--max", dest="max")
     list_parser.add_argument(
-        "--sort",
+        "--s ort",
         choices=["date", "amount", "category", "created", "id"],
         default="date",
     )
