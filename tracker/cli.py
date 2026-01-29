@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import sys
 
-from .service import add_expense, export_csv, list_expenses, summary
+from .logger import get_logger
+from .service import add_expense, delete_expense, export_csv, list_expenses, summary
 from .utils import format_amount, parse_date, parse_month, today_str
 
 
@@ -77,6 +78,7 @@ def _handle_add(args: argparse.Namespace) -> int:
             currency=args.currency,
         )
     except ValueError as exc:
+        get_logger().warning("Validation failure on add: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -104,6 +106,7 @@ def _handle_list(args: argparse.Namespace) -> int:
             limit=limit,
         )
     except ValueError as exc:
+        get_logger().warning("Validation failure on list: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -124,6 +127,7 @@ def _handle_summary(args: argparse.Namespace) -> int:
         if args.to_date:
             parse_date(args.to_date)
     except ValueError as exc:
+        get_logger().warning("Validation failure on summary: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -167,6 +171,7 @@ def _handle_export(args: argparse.Namespace) -> int:
         max_amount = _positive_amount(args.max) if args.max else None
         limit = _positive_int(args.limit) if args.limit else None
     except ValueError as exc:
+        get_logger().warning("Validation failure on export: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -181,6 +186,16 @@ def _handle_export(args: argparse.Namespace) -> int:
     )
     path = export_csv(args.path, expenses)
     print(f"Exported {len(expenses)} expense(s) to {path}")
+    return 0
+
+
+def _handle_delete(args: argparse.Namespace) -> int:
+    deleted = delete_expense(args.id)
+    if not deleted:
+        _print_error(f"Expense not found: {args.id}")
+        get_logger().info("Failed to delete", args.id)
+        return 1
+    print(f"Deleted: {args.id}")
     return 0
 
 
@@ -237,11 +252,17 @@ def build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--limit")
     export_parser.set_defaults(func=_handle_export)
 
+    delete_parser = subparsers.add_parser("delete", help="Delete an expense")
+    delete_parser.add_argument("--id", required=True)
+    delete_parser.set_defaults(func=_handle_delete)
+
     return parser
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)
+    cmd_args = argv if argv is not None else sys.argv[1:]
+    get_logger().info("Command called: %s", " ".join(cmd_args) or "(no args)")
     exit_code = args.func(args)
     raise SystemExit(exit_code)

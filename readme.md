@@ -40,6 +40,12 @@ Export to CSV:
 python3 -m tracker export --path data/expenses.csv
 ```
 
+Delete an expense:
+
+```bash
+python3 -m tracker delete --id EXP-20260126-0001
+```
+
 Commands
 --------
 add
@@ -59,6 +65,10 @@ export
 - Exports current list view to CSV.
 - Optional filters: same as `list`
 - Output path: `--path` (default: `data/expenses.csv`)
+
+delete
+- Deletes an expense by id.
+- Required: `--id`
 
 Data & logs
 -----------

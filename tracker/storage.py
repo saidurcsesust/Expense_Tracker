@@ -27,6 +27,9 @@ def load_data() -> dict:
     except json.JSONDecodeError as exc:
         logger.error("Invalid JSON in %s", path)
         raise RuntimeError("Data file is corrupted") from exc
+    except OSError as exc:
+        logger.error("Failed to read data file %s: %s", path, exc)
+        raise RuntimeError("Unable to read data file") from exc
 
     if "version" not in data or "expenses" not in data:
         logger.error("Unexpected schema in %s", path)
@@ -38,6 +41,10 @@ def load_data() -> dict:
 def save_data(data: dict) -> None:
     path = _data_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(data, handle, indent=2, ensure_ascii=True)
-        handle.write("\n")
+    try:
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, ensure_ascii=True)
+            handle.write("\n")
+    except OSError as exc:
+        get_logger().error("Failed to write data file %s: %s", path, exc)
+        raise RuntimeError("Unable to write data file") from exc

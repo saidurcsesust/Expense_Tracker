@@ -126,3 +126,19 @@ def export_csv(path: str, expenses: Iterable[Expense]) -> Path:
             )
     get_logger().info("Exported expenses to %s", csv_path)
     return csv_path
+
+
+def delete_expense(expense_id: str) -> bool:
+    data = load_data()
+    expenses = data["expenses"]
+    original_len = len(expenses)
+    data["expenses"] = [item for item in expenses if item.get("id") != expense_id]
+    if len(data["expenses"]) == original_len:
+        return False
+    save_data(data)
+    get_logger().info("Deleted expense %s", expense_id)
+    return True
+
+
+
+
