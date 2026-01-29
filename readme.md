@@ -56,6 +56,14 @@ Commands (with examples)
 ### Add
 ```bash
 python3 -m tracker add --date 2026-01-26 --category food --amount 250.5 --note "Lunch"
+python3 -m tracker add --date 2026-01-26 --category Transport --amount 15.0 --note "Bus fare"
+python3 -m tracker add --date 2026-01-27 --category Shopping --amount 1250.0 --note "New Monitor"
+python3 -m tracker add --date 2026-02-27 --category Utilities --amount 85.25 --note "Internet Bill"
+python3 -m tracker add --date 2026-01-28 --category Food --amount 12.99 --note "Coffee & Croissant"
+python3 -m tracker add --date 2026-02-28 --category Entertainment --amount 60.0 --note "Movie night"
+python3 -m tracker add --date 2026-01-29 --category Health --amount 45.0 --note "Gym Supplement"
+
+
 ```
 
 ### List
