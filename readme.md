@@ -5,14 +5,41 @@ Track expenses in a simple, file-backed CLI. Supports add, list, edit, delete, s
 
 Project structure
 -----------------
-- `tracker/` CLI and business logic
-- `data/expenses.json` persistent storage
-- `logs/tracker.log` command, validation, and read/write error logs
+```
+Expense_Tracker/
+├─ data/
+│  └─ expenses.json
+├─ logs/
+│  └─ tracker.log
+├─ tracker/
+│  ├─ __init__.py
+│  ├─ __main__.py
+│  ├─ cli.py
+│  ├─ logger.py
+│  ├─ models.py
+│  ├─ service.py
+│  ├─ storage.py
+│  └─ utils.py
+└─ readme.md
+```
+
 
 Setup
 -----
 Requirements:
 - Python 3.10+
+
+Clone:
+```bash
+git clone https://github.com/saidurcsesust/Expense_Tracker.git
+cd Expense_Tracker
+```
+
+Create virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
 
 Features
