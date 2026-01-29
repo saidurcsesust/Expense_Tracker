@@ -15,6 +15,7 @@ from .service import (
 from .utils import format_amount, parse_date, parse_month, today_str
 
 
+# Parse and validate positive amount input.
 def _positive_amount(value: str) -> float:
     try:
         amount = float(value)
@@ -25,6 +26,7 @@ def _positive_amount(value: str) -> float:
     return amount
 
 
+# Parse and validate positive integer input.
 def _positive_int(value: str) -> int:
     try:
         number = int(value)
@@ -35,10 +37,12 @@ def _positive_int(value: str) -> int:
     return number
 
 
+# Validate month string format.
 def _validate_month(value: str) -> None:
     parse_month(value)
 
 
+# Render expenses in a simple table.
 def _render_table(expenses: list) -> str:
     headers = ["id", "date", "category", "amount", "note"]
     rows = [
@@ -64,16 +68,19 @@ def _render_table(expenses: list) -> str:
     return "\n".join(lines)
 
 
+# Print an error message to stderr.
 def _print_error(message: str) -> None:
     print(f"Error: {message}", file=sys.stderr)
 
 
+# Argparse subclass that logs argument errors.
 class _LoggingArgumentParser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
         get_logger().error("Argument error: %s", message)
         super().error(message)
 
 
+# Handle add command.
 def _handle_add(args: argparse.Namespace) -> int:
     try:
         date = args.date or today_str()
@@ -91,7 +98,7 @@ def _handle_add(args: argparse.Namespace) -> int:
             currency=args.currency,
         )
     except ValueError as exc:
-        get_logger().warning("Validation failure on add: %s", exc)
+        get_logger().error("Validation failure on add: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -102,6 +109,7 @@ def _handle_add(args: argparse.Namespace) -> int:
     return 0
 
 
+# Handle list command.
 def _handle_list(args: argparse.Namespace) -> int:
     try:
         if args.month:
@@ -119,7 +127,7 @@ def _handle_list(args: argparse.Namespace) -> int:
             limit=limit,
         )
     except ValueError as exc:
-        get_logger().warning("Validation failure on list: %s", exc)
+        get_logger().error("Validation failure on list: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -131,6 +139,7 @@ def _handle_list(args: argparse.Namespace) -> int:
     return 0
 
 
+# Handle summary command.
 def _handle_summary(args: argparse.Namespace) -> int:
     try:
         if args.month:
@@ -140,7 +149,7 @@ def _handle_summary(args: argparse.Namespace) -> int:
         if args.to_date:
             parse_date(args.to_date)
     except ValueError as exc:
-        get_logger().warning("Validation failure on summary: %s", exc)
+        get_logger().error("Validation failure on summary: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -178,6 +187,7 @@ def _handle_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+# Handle export command.
 def _handle_export(args: argparse.Namespace) -> int:
     try:
         if args.month:
@@ -186,7 +196,7 @@ def _handle_export(args: argparse.Namespace) -> int:
         max_amount = _positive_amount(args.max) if args.max else None
         limit = _positive_int(args.limit) if args.limit else None
     except ValueError as exc:
-        get_logger().warning("Validation failure on export: %s", exc)
+        get_logger().error("Validation failure on export: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -204,16 +214,18 @@ def _handle_export(args: argparse.Namespace) -> int:
     return 0
 
 
+# Handle delete command.
 def _handle_delete(args: argparse.Namespace) -> int:
     deleted = delete_expense(args.id)
     if not deleted:
         _print_error(f"Expense not found: {args.id}")
-        get_logger().warning("Delete failed: %s", args.id)
+        get_logger().error("Delete failed: %s", args.id)
         return 1
     print(f"Deleted: {args.id}")
     return 0
 
 
+# Handle edit command.
 def _handle_edit(args: argparse.Namespace) -> int:
     if not any(
         [
@@ -237,7 +249,7 @@ def _handle_edit(args: argparse.Namespace) -> int:
             if not args.category:
                 raise ValueError("category is required")
     except ValueError as exc:
-        get_logger().warning("Validation failure on edit: %s", exc)
+        get_logger().error("Validation failure on edit: %s", exc)
         _print_error(str(exc))
         return 1
 
@@ -251,7 +263,7 @@ def _handle_edit(args: argparse.Namespace) -> int:
     )
     if expense is None:
         _print_error(f"Expense not found: {args.id}")
-        get_logger().warning("Edit failed: %s", args.id)
+        get_logger().error("Edit failed: %s", args.id)
         return 1
 
     print(
@@ -261,6 +273,7 @@ def _handle_edit(args: argparse.Namespace) -> int:
     return 0
 
 
+# Build and configure CLI parser.
 def build_parser() -> argparse.ArgumentParser:
     parser = _LoggingArgumentParser(prog="tracker", description="Expense Tracker CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -330,6 +343,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# CLI entrypoint.
 def main(argv: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(argv)

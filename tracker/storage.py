@@ -9,10 +9,12 @@ from .logger import get_logger
 _DEFAULT_DATA = {"version": 1, "expenses": []}
 
 
+# Resolve path to the data file.
 def _data_path() -> Path:
     return Path(__file__).resolve().parent.parent / "data" / "expenses.json"
 
 
+# Load data from json file with validation.
 def load_data() -> dict:
     path = _data_path()
     logger = get_logger()
@@ -38,6 +40,7 @@ def load_data() -> dict:
     return data
 
 
+# Save data to json file.
 def save_data(data: dict) -> None:
     path = _data_path()
     path.parent.mkdir(parents=True, exist_ok=True)

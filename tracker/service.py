@@ -10,6 +10,7 @@ from .storage import load_data, save_data
 from .utils import generate_id, now_iso
 
 
+# Add a new expense and persist it.
 def add_expense(
     *,
     date: str,
@@ -35,6 +36,7 @@ def add_expense(
     return expense
 
 
+# List expenses with optional filters, sorting, and limit.
 def list_expenses(
     *,
     month: str | None = None,
@@ -72,6 +74,7 @@ def list_expenses(
     return filtered
 
 
+# Build summary totals from filtered expenses.
 def summary(
     *,
     month: str | None = None,
@@ -104,6 +107,7 @@ def summary(
     return filtered, category_totals, month_totals
 
 
+# Export expenses to a CSV file.
 def export_csv(path: str, expenses: Iterable[Expense]) -> Path:
     csv_path = Path(path)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,6 +132,7 @@ def export_csv(path: str, expenses: Iterable[Expense]) -> Path:
     return csv_path
 
 
+# Delete an expense by id.
 def delete_expense(expense_id: str) -> bool:
     data = load_data()
     expenses = data["expenses"]
@@ -140,6 +145,7 @@ def delete_expense(expense_id: str) -> bool:
     return True
 
 
+# Edit an expense by id and return the updated model.
 def edit_expense(
     *,
     expense_id: str,
@@ -167,6 +173,5 @@ def edit_expense(
             get_logger().info("Edited expense %s", expense_id)
             return Expense.from_dict(item)
     return None
-
 
 
