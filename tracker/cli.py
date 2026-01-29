@@ -4,7 +4,14 @@ import argparse
 import sys
 
 from .logger import get_logger
-from .service import add_expense, delete_expense, export_csv, list_expenses, summary
+from .service import (
+    add_expense,
+    delete_expense,
+    edit_expense,
+    export_csv,
+    list_expenses,
+    summary,
+)
 from .utils import format_amount, parse_date, parse_month, today_str
 
 
@@ -156,7 +163,9 @@ def _handle_summary(args: argparse.Namespace) -> int:
     for category in sorted(categories):
         print(f"- {category}: {categories[category]:.2f} BDT")
 
-    print("\nMonthly totals:")
+    print("\nAverage per day in month:")
+    for month in months:
+        months[month] /=30
     for month in sorted(months):
         print(f"- {month}: {months[month]:.2f} BDT")
 
@@ -193,9 +202,55 @@ def _handle_delete(args: argparse.Namespace) -> int:
     deleted = delete_expense(args.id)
     if not deleted:
         _print_error(f"Expense not found: {args.id}")
-        get_logger().info("Failed to delete", args.id)
+        get_logger().info("Failed to delete %s", args.id)
         return 1
     print(f"Deleted: {args.id}")
+    return 0
+
+
+def _handle_edit(args: argparse.Namespace) -> int:
+    if not any(
+        [
+            args.date,
+            args.category,
+            args.amount,
+            args.note,
+            args.currency,
+        ]
+    ):
+        _print_error("At least one field is required to edit")
+        return 1
+
+    try:
+        if args.date:
+            parse_date(args.date)
+        if args.amount:
+            args.amount = _positive_amount(args.amount)
+        if args.category is not None:
+            args.category = args.category.strip()
+            if not args.category:
+                raise ValueError("category is required")
+    except ValueError as exc:
+        get_logger().warning("Validation failure on edit: %s", exc)
+        _print_error(str(exc))
+        return 1
+
+    expense = edit_expense(
+        expense_id=args.id,
+        date=args.date,
+        category=args.category.lower() if args.category else None,
+        amount=args.amount,
+        note=args.note,
+        currency=args.currency,
+    )
+    if expense is None:
+        _print_error(f"Expense not found: {args.id}")
+        return 1
+
+    print(
+        f"Updated: {expense.id} | {expense.date} | {expense.category} | "
+        f"{format_amount(expense.amount, expense.currency)} | {expense.note}"
+    )
     return 0
 
 
@@ -255,6 +310,15 @@ def build_parser() -> argparse.ArgumentParser:
     delete_parser = subparsers.add_parser("delete", help="Delete an expense")
     delete_parser.add_argument("--id", required=True)
     delete_parser.set_defaults(func=_handle_delete)
+
+    edit_parser = subparsers.add_parser("edit", help="Edit an expense")
+    edit_parser.add_argument("--id", required=True)
+    edit_parser.add_argument("--date", help="YYYY-MM-DD")
+    edit_parser.add_argument("--category")
+    edit_parser.add_argument("--amount")
+    edit_parser.add_argument("--note")
+    edit_parser.add_argument("--currency")
+    edit_parser.set_defaults(func=_handle_edit)
 
     return parser
 

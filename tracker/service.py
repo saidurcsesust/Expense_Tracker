@@ -140,5 +140,33 @@ def delete_expense(expense_id: str) -> bool:
     return True
 
 
+def edit_expense(
+    *,
+    expense_id: str,
+    date: str | None = None,
+    category: str | None = None,
+    amount: float | None = None,
+    note: str | None = None,
+    currency: str | None = None,
+) -> Expense | None:
+    data = load_data()
+    expenses = data["expenses"]
+    for item in expenses:
+        if item.get("id") == expense_id:
+            if date is not None:
+                item["date"] = date
+            if category is not None:
+                item["category"] = category
+            if amount is not None:
+                item["amount"] = amount
+            if note is not None:
+                item["note"] = note
+            if currency is not None:
+                item["currency"] = currency
+            save_data(data)
+            get_logger().info("Edited expense %s", expense_id)
+            return Expense.from_dict(item)
+    return None
+
 
 
