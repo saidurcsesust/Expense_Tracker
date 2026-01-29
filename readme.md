@@ -7,18 +7,13 @@ Project structure
 -----------------
 - `tracker/` CLI and business logic
 - `data/expenses.json` persistent storage
-- `logs/tracker.log` command, validation, and IO logs
+- `logs/tracker.log` command, validation, and read/write error logs
 
 Setup
 -----
 Requirements:
 - Python 3.10+
 
-From the repo root:
-
-```bash
-python3 -m tracker --help
-```
 
 Features
 --------
@@ -32,12 +27,12 @@ Features
 Commands (with examples)
 ------------------------
 
-Add:
+## Add
 ```bash
 python3 -m tracker add --date 2026-01-26 --category food --amount 250.5 --note "Lunch"
 ```
 
-List:
+## List
 ```bash
 python3 -m tracker list
 python3 -m tracker list --month 2026-01 --category food --sort amount --desc --limit 10
@@ -45,7 +40,7 @@ python3 -m tracker list --min 100 --max 500
 python3 -m tracker list --sort category
 ```
 
-Summary:
+## Summary
 ```bash
 python3 -m tracker summary
 python3 -m tracker summary --month 2026-01
@@ -55,17 +50,17 @@ python3 -m tracker summary --month 2026-01 --category food
 python3 -m tracker summary --from 2026-01-01 --to 2026-01-31 --category food
 ```
 
-Edit:
+## Edit
 ```bash
 python3 -m tracker edit --id EXP-20260126-0002 --amount 300 --note "Lunch+coffee"
 ```
 
-Delete:
+## Delete
 ```bash
 python3 -m tracker delete --id EXP-20260126-0001
 ```
 
-Export:
+## Export
 ```bash
 python3 -m tracker export --path data/expenses.csv
 python3 -m tracker export --month 2026-01 --category food
@@ -74,26 +69,26 @@ python3 -m tracker export --month 2026-01 --category food
 Command options
 ---------------
 
-add
+### Add
 - Required: `--category`, `--amount`, `--date` (YYYY-MM-DD)
 - Optional:  `--note`, `--currency` (default: BDT)
 
-list
+### List
 - Optional filters: `--month` (YYYY-MM), `--category`, `--min`, `--max`
 - Sorting: `--sort` (date, amount, category, created, id), `--desc`
 - Limit: `--limit`
 
-summary
+### Summary
 - Prints total count, grand total, totals by category, and monthly totals
 - Optional filters: `--month` (YYYY-MM), `--from` (YYYY-MM-DD), `--to` (YYYY-MM-DD), `--category`
 
-edit
+### Edit
 - Required: `--id`
 - Optional: `--date` (YYYY-MM-DD), `--category`, `--amount`, `--note`, `--currency`
 
-delete
+### Delete
 - Required: `--id`
 
-export
+### Export
 - Optional filters: same as `list`
 - Output path: `--path` (default: `data/expenses.csv`)
