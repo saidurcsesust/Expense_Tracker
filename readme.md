@@ -3,6 +3,23 @@ Expense Tracker CLI
 
 Track expenses in a simple, file-backed CLI. Supports add, list, edit, delete, summary, and CSV export.
 
+Setup
+-----
+Requirements:
+- Python 3.10+
+
+Clone:
+```bash
+git clone https://github.com/saidurcsesust/Expense_Tracker.git
+cd Expense_Tracker
+```
+
+Create virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 Project structure
 -----------------
 ```
@@ -24,24 +41,6 @@ Expense_Tracker/
 ```
 
 
-Setup
------
-Requirements:
-- Python 3.10+
-
-Clone:
-```bash
-git clone https://github.com/saidurcsesust/Expense_Tracker.git
-cd Expense_Tracker
-```
-
-Create virtual environment:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-
 Features
 --------
 - Add expenses with date, category, amount, note, and currency
@@ -54,12 +53,12 @@ Features
 Commands (with examples)
 ------------------------
 
-## Add
+### Add
 ```bash
 python3 -m tracker add --date 2026-01-26 --category food --amount 250.5 --note "Lunch"
 ```
 
-## List
+### List
 ```bash
 python3 -m tracker list
 python3 -m tracker list --month 2026-01 --category food --sort amount --desc --limit 10
@@ -67,7 +66,7 @@ python3 -m tracker list --min 100 --max 500
 python3 -m tracker list --sort category
 ```
 
-## Summary
+### Summary
 ```bash
 python3 -m tracker summary
 python3 -m tracker summary --month 2026-01
@@ -77,17 +76,17 @@ python3 -m tracker summary --month 2026-01 --category food
 python3 -m tracker summary --from 2026-01-01 --to 2026-01-31 --category food
 ```
 
-## Edit
+### Edit
 ```bash
 python3 -m tracker edit --id EXP-20260126-0002 --amount 300 --note "Lunch+coffee"
 ```
 
-## Delete
+### Delete
 ```bash
 python3 -m tracker delete --id EXP-20260126-0001
 ```
 
-## Export
+### Export
 ```bash
 python3 -m tracker export --path data/expenses.csv
 ```
