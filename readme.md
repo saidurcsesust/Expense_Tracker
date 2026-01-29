@@ -63,7 +63,6 @@ python3 -m tracker delete --id EXP-20260126-0001
 ## Export
 ```bash
 python3 -m tracker export --path data/expenses.csv
-python3 -m tracker export --month 2026-01 --category food
 ```
 
 Command options
@@ -90,5 +89,4 @@ Command options
 - Required: `--id`
 
 ### Export
-- Optional filters: same as `list`
 - Output path: `--path` (default: `data/expenses.csv`)

@@ -68,6 +68,12 @@ def _print_error(message: str) -> None:
     print(f"Error: {message}", file=sys.stderr)
 
 
+class _LoggingArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        get_logger().error("Argument error: %s", message)
+        super().error(message)
+
+
 def _handle_add(args: argparse.Namespace) -> int:
     try:
         date = args.date or today_str()
@@ -202,7 +208,7 @@ def _handle_delete(args: argparse.Namespace) -> int:
     deleted = delete_expense(args.id)
     if not deleted:
         _print_error(f"Expense not found: {args.id}")
-        get_logger().info("Failed to delete %s", args.id)
+        get_logger().warning("Delete failed: %s", args.id)
         return 1
     print(f"Deleted: {args.id}")
     return 0
@@ -245,6 +251,7 @@ def _handle_edit(args: argparse.Namespace) -> int:
     )
     if expense is None:
         _print_error(f"Expense not found: {args.id}")
+        get_logger().warning("Edit failed: %s", args.id)
         return 1
 
     print(
@@ -255,7 +262,7 @@ def _handle_edit(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="tracker", description="Expense Tracker CLI")
+    parser = _LoggingArgumentParser(prog="tracker", description="Expense Tracker CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
 
