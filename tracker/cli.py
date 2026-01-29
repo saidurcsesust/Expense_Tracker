@@ -42,7 +42,7 @@ def _validate_month(value: str) -> None:
     parse_month(value)
 
 
-# Render expenses in a simple table.
+# Render a boxed table for expenses.
 def _render_table(expenses: list) -> str:
     headers = ["id", "date", "category", "amount", "note"]
     rows = [
@@ -55,23 +55,41 @@ def _render_table(expenses: list) -> str:
         ]
         for exp in expenses
     ]
-
-    widths = [len(header) for header in headers]
-    for row in rows:
-        widths = [max(widths[i], len(str(row[i]))) for i in range(len(headers))]
-
-    def _format_row(values: list[str]) -> str:
-        return "  ".join(str(values[i]).ljust(widths[i]) for i in range(len(values)))
-
-    lines = [_format_row(headers)]
-    lines.extend(_format_row(row) for row in rows)
-    return "\n".join(lines)
+    return _render_box_table(headers, rows)
 
 
 # Print an error message to stderr.
 def _print_error(message: str) -> None:
     print(f"Error: {message}", file=sys.stderr)
 
+
+# Render a boxed table.
+def _render_box_table(headers: list[str], rows: list[list[str]]) -> str:
+    widths = [len(header) for header in headers]
+    for row in rows:
+        widths = [max(widths[i], len(str(row[i]))) for i in range(len(headers))]
+
+    def _hline(left: str, mid: str, right: str) -> str:
+        parts = ["─" * (widths[i] + 2) for i in range(len(headers))]
+        return left + mid.join(parts) + right
+
+    def _format_row(values: list[str]) -> str:
+        cells = [f" {str(values[i]).ljust(widths[i])} " for i in range(len(values))]
+        return "│" + "│".join(cells) + "│"
+
+    lines = [
+        _hline("┌", "┬", "┐"),
+        _format_row(headers),
+        _hline("├", "┼", "┤"),
+    ]
+    lines.extend(_format_row(row) for row in rows)
+    lines.append(_hline("└", "┴", "┘"))
+    return "\n".join(lines)
+
+
+# Render a boxed 2-column key/value table.
+def _render_kv_table(headers: list[str], rows: list[list[str]]) -> str:
+    return _render_box_table(headers, rows)
 
 # Argparse subclass that logs argument errors.
 class _LoggingArgumentParser(argparse.ArgumentParser):
@@ -164,25 +182,28 @@ def _handle_summary(args: argparse.Namespace) -> int:
         print("No expenses to summarize.")
         return 0
 
-    print(f"Total Expenses: {len(expenses)}")
-    
-    total_amount = 0
+    total_amount = sum(item.amount for item in expenses)
+    summary_rows = [
+        ["Total Expenses", str(len(expenses))],
+        ["Grand Total", format_amount(total_amount, "BDT")],
+    ]
+    print(_render_kv_table(["metric", "value"], summary_rows))
 
+    if categories:
+        category_rows = [
+            [category, format_amount(categories[category], "BDT")]
+            for category in sorted(categories)
+        ]
+        print("\nBy category:")
+        print(_render_kv_table(["category", "total"], category_rows))
 
-    for item in expenses:
-        total_amount+=item.amount
-    
-    print(f"Grand Total: {total_amount} BDT \n")
-
-    print("By category:")
-    for category in sorted(categories):
-        print(f"- {category}: {categories[category]:.2f} BDT")
-
-    print("\nAverage per day in month:")
-    for month in months:
-        months[month] /=30
-    for month in sorted(months):
-        print(f"- {month}: {months[month]:.2f} BDT")
+    if months:
+        avg_rows = [
+            [month, format_amount(months[month] / 30, "BDT")]
+            for month in sorted(months)
+        ]
+        print("\nAverage per day in month:")
+        print(_render_kv_table(["month", "avg/day"], avg_rows))
 
     return 0
 
