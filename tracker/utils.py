@@ -35,19 +35,13 @@ def format_amount(amount: float, currency: str) -> str:
 
 
 def generate_id(expenses: list[dict], date_str: str) -> str:
-    prefix = f"EXP-{date_str}-"
-
-    if not expenses:
-        return f"{prefix}0001"
-
-    last_id = expenses[-1].get("id")
-    if not isinstance(last_id, str):
-        return f"{prefix}0001"
-
-    # Expected format: EXP-YYYY-MM-DD-0001
-    parts = last_id.split("-")
-    if len(parts) != 5 or not parts[-1].isdigit():
-        return f"{prefix}0001"
-
-    next_seq = int(parts[-1]) + 1
-    return f"{prefix}{next_seq:04d}"
+    prefix = f"EXP-{date_str.replace('-', '')}-"
+    seq = 1
+    existing = [
+        int(item["id"].split("-")[-1])
+        for item in expenses
+        if isinstance(item.get("id"), str) and item["id"].startswith(prefix)
+    ]
+    if existing:
+        seq = max(existing) + 1
+    return f"{prefix}{seq:04d}"

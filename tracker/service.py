@@ -72,21 +72,36 @@ def list_expenses(
     return filtered
 
 
-def summary() -> tuple[dict[str, float], dict[str, float]]:
+def summary(
+    *,
+    month: str | None = None,
+    category: str | None = None,
+    from_date: str | None = None,
+    to_date: str | None = None,
+) -> tuple[list[Expense], dict[str, float], dict[str, float]]:
     data = load_data()
     expenses = [Expense.from_dict(item) for item in data["expenses"]]
+
+    filtered = [
+        exp
+        for exp in expenses
+        if (month is None or exp.date.startswith(month))
+        and (category is None or exp.category == category)
+        and (from_date is None or exp.date >= from_date)
+        and (to_date is None or exp.date <= to_date)
+    ]
 
     category_totals: dict[str, float] = {}
     month_totals: dict[str, float] = {}
 
-    for expense in expenses:
+    for expense in filtered:
         category_totals[expense.category] = (
             category_totals.get(expense.category, 0.0) + expense.amount
         )
         month_key = expense.date[:7]
         month_totals[month_key] = month_totals.get(month_key, 0.0) + expense.amount
 
-    return category_totals, month_totals
+    return filtered, category_totals, month_totals
 
 
 def export_csv(path: str, expenses: Iterable[Expense]) -> Path:

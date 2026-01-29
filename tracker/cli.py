@@ -115,20 +115,46 @@ def _handle_list(args: argparse.Namespace) -> int:
     return 0
 
 
-def _handle_summary(_: argparse.Namespace) -> int:
-    categories, months = summary()
+def _handle_summary(args: argparse.Namespace) -> int:
+    try:
+        if args.month:
+            _validate_month(args.month)
+        if args.from_date:
+            parse_date(args.from_date)
+        if args.to_date:
+            parse_date(args.to_date)
+    except ValueError as exc:
+        _print_error(str(exc))
+        return 1
+
+    expenses, categories, months = summary(
+        month=args.month,
+        category=args.category,
+        from_date=args.from_date,
+        to_date=args.to_date,
+    )
 
     if not categories:
         print("No expenses to summarize.")
         return 0
 
-    print("Totals by category:")
+    print(f"Total Expenses: {len(expenses)}")
+    
+    total_amount = 0
+
+
+    for item in expenses:
+        total_amount+=item.amount
+    
+    print(f"Grand Total: {total_amount} BDT \n")
+
+    print("By category:")
     for category in sorted(categories):
-        print(f"- {category}: {categories[category]:.2f}")
+        print(f"- {category}: {categories[category]:.2f} BDT")
 
     print("\nMonthly totals:")
     for month in sorted(months):
-        print(f"- {month}: {months[month]:.2f}")
+        print(f"- {month}: {months[month]:.2f} BDT")
 
     return 0
 
@@ -181,7 +207,7 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser.add_argument("--min", dest="min")
     list_parser.add_argument("--max", dest="max")
     list_parser.add_argument(
-        "--s ort",
+        "--sort",
         choices=["date", "amount", "category", "created", "id"],
         default="date",
     )
@@ -190,6 +216,10 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser.set_defaults(func=_handle_list)
 
     summary_parser = subparsers.add_parser("summary", help="Show totals")
+    summary_parser.add_argument("--month", help="YYYY-MM")
+    summary_parser.add_argument("--from", dest="from_date", help="YYYY-MM-DD")
+    summary_parser.add_argument("--to", dest="to_date", help="YYYY-MM-DD")
+    summary_parser.add_argument("--category")
     summary_parser.set_defaults(func=_handle_summary)
 
     export_parser = subparsers.add_parser("export", help="Export to CSV")
