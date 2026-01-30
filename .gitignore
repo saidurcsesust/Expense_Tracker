@@ -2,3 +2,4 @@ data
 logs
 .venv/
 myenv
+tracker/__pycache__
